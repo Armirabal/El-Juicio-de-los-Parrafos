@@ -1,0 +1,1 @@
+Lee y observa con atención cada extracto de un trabajo académico que se presenta a continuación. Decide cuál de los personajes de la telenovela redactó ese extracto basándote en su perfil. ¡Y no olvides justificar tu veredicto antes de dictar sentencia!
