@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Juicio de los Párrafos - Juego Interactivo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Playfair+Display:ital,wght@0,700;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      background: radial-gradient(circle, #2a0303 0%, #0d0101 100%);
+      font-family: 'Montserrat', sans-serif;
+    }
+    .font-telenovela {
+      font-family: 'Cinzel Decorative', serif;
+    }
+    .font-sub {
+      font-family: 'Playfair Display', serif;
+    }
+    .gold-border {
+      border: 3px solid #d4af37;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+    }
+    .gold-text {
+      color: #ffe066;
+      background: linear-gradient(to bottom, #ffe066 0%, #d4af37 50%, #aa7c11 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .card-shadow {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #aa7c11 0%, #d4af37 50%, #ffe066 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-gold:hover:not(:disabled) {
+      transform: scale(1.03);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+    }
+    /* Diálogo indentado tipo blockquote (Caso 5) */
+    .apa-blockquote {
+      margin-left: 2rem;
+      margin-right: 2rem;
+      border-left: 3px solid #d4af37;
+      padding-left: 1rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-gray-100 flex flex-col justify-between p-4 md:p-8">
+
+  <!-- Encabezado de la Telenovela -->
+  <header class="text-center py-4 z-10 max-w-5xl mx-auto w-full">
+    <span class="text-xs uppercase tracking-[0.3em] text-[#d4af37] font-semibold">Actividad Interactiva de Metodología</span>
+    <h1 class="text-3xl md:text-5xl font-telenovela gold-text drop-shadow-lg mt-1">
+      EL JUICIO DE LOS PÁRRAFOS
+    </h1>
+    <p class="text-sm italic text-gray-300 font-sub mt-2">¿Cuál personaje cometió el pecado de redacción... y quién conservó su honor académico?</p>
+  </header>
+
+  <!-- Contenedor del Juego -->
+  <main class="flex-grow flex items-center justify-center my-6 z-10 max-w-5xl mx-auto w-full">
+    <div class="bg-[#1f0303]/95 gold-border rounded-xl p-6 md:p-8 w-full card-shadow relative overflow-hidden">
+      
+      <!-- Indicador de Casos y Puntuación -->
+      <div class="flex justify-between items-center mb-6 border-b border-[#d4af37]/20 pb-4">
+        <div>
+          <span class="text-xs uppercase tracking-wider text-[#d4af37] font-bold" id="caseTitleLabel">Caso 1 de 10</span>
+          <div class="text-xl md:text-2xl font-sub italic font-bold text-[#ffe066]" id="caseCounter">Cargando caso...</div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs uppercase tracking-wider text-gray-400">Veredictos Correctos</span>
+          <div class="text-xl md:text-2xl font-bold text-green-400" id="scoreCounter">0 / 10</div>
+        </div>
+      </div>
+
+      <!-- Instrucciones de la Actividad -->
+      <div class="bg-[#2d0707] border border-[#d4af37]/20 rounded-lg p-4 mb-6 text-sm text-gray-200">
+        <strong class="text-[#ffe066]">Instrucciones para los estudiantes:</strong> 
+        Lee y observa con atención cada extracto de un trabajo académico que se presenta a continuación. Decide cuál de los personajes de la telenovela redactó ese extracto basándote en su perfil. <span class="italic font-sub text-[#ffe066]">¡Y no olvides justificar tu veredicto antes de dictar sentencia!</span>
+      </div>
+
+      <!-- Área de Visualización del Caso -->
+      <div class="bg-black/60 rounded-lg p-5 md:p-7 border border-neutral-800 mb-6 relative">
+        <span class="absolute top-2 right-3 text-[10px] tracking-widest text-[#d4af37] uppercase font-semibold">Extracto del Manuscrito</span>
+        <div class="text-base md:text-lg leading-relaxed pt-2" id="caseText">
+          <!-- El texto y la instrucción del caso actual se inyectan dinámicamente aquí -->
+        </div>
+      </div>
+
+      <!-- Opciones del Reparto de Personajes (En orden idéntico constante) -->
+      <div class="mb-6">
+        <span class="block text-xs uppercase tracking-wider text-gray-300 font-semibold mb-3">Selecciona el Personaje Autor:</span>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="optionsGrid">
+          <!-- Las opciones de personajes se generan dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Sección de Justificación del Alumno (Rango de 50 a 250 caracteres) -->
+      <div class="mb-6 bg-black/30 border border-[#d4af37]/10 p-4 rounded-lg">
+        <label for="studentJustification" class="block text-xs uppercase tracking-wider text-gray-300 font-semibold mb-1">
+          Justifica tu respuesta <span class="text-red-500 font-bold">*Obligatorio</span> (¿Por qué elegiste a este personaje?):
+        </label>
+        <span class="block text-[11px] text-gray-400 mb-2 italic">Desarrolla un argumento metodológico breve, preciso y contundente de entre 50 y 250 caracteres.</span>
+        <textarea id="studentJustification" rows="4" maxlength="250" placeholder="Escribe aquí tu análisis metodológico. Explica de forma precisa por qué este fragmento delata a este personaje en particular (considerando el uso de comillas, paráfrasis, referencias bibliográficas, etc.)...." class="w-full bg-black/40 border border-[#d4af37]/20 rounded-lg p-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-[#d4af37] transition-all"></textarea>
+        <div class="flex justify-between items-center mt-2">
+          <span id="charCount" class="text-[11px] text-red-400">0 / 250 caracteres (mín. 50)</span>
+          <span id="validationWarning" class="text-[11px] text-[#ffe066] font-medium">⚠️ Elige un personaje y redacta tu justificación.</span>
+        </div>
+      </div>
+
+      <!-- Feedback / Retroalimentación Dinámica -->
+      <div id="feedbackBox" class="hidden rounded-lg p-5 mb-6 border transition-all duration-300">
+        <div class="flex items-start gap-4">
+          <div class="text-3xl" id="feedbackIcon">🌹</div>
+          <div>
+            <h4 class="font-bold text-lg mb-1" id="feedbackTitle">¡Veredicto Dictado!</h4>
+            <div class="text-xs text-gray-400 italic mb-2 font-sub" id="justificationReinforcement"></div>
+            <p class="text-sm leading-relaxed" id="feedbackText"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-[#d4af37]/20 pt-4">
+        <!-- Botón para retroceder siempre accesible si no es el primer caso -->
+        <button id="btnPrev" class="w-full sm:w-auto bg-neutral-800 hover:bg-neutral-700 text-gray-300 font-semibold uppercase tracking-widest text-xs py-3 px-6 rounded border border-neutral-700 transition-all">
+          Caso Anterior
+        </button>
+        
+        <div class="flex gap-3 w-full sm:w-auto justify-end">
+          <button id="btnSubmit" disabled class="w-full sm:w-auto btn-gold text-black font-semibold uppercase tracking-widest text-xs py-3 px-6 rounded disabled:opacity-40 disabled:cursor-not-allowed">
+            Dictar Sentencia
+          </button>
+          <button id="btnNext" class="w-full sm:w-auto hidden bg-neutral-800 hover:bg-neutral-700 text-[#d4af37] font-semibold uppercase tracking-widest text-xs py-3 px-6 rounded border border-[#d4af37]/30 transition-all">
+            Siguiente Caso
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Pie de Página -->
+  <footer class="text-center py-4 text-xs text-gray-500 z-10">
+    <p>Hacienda "La Metodología" © 2026. Todos los derechos reservados. Recuerda citar esta actividad correctamente.</p>
+  </footer>
+
+  <!-- Modal de Finalización del Juego -->
+  <div id="finishModal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 hidden transition-all duration-300">
+    <div class="bg-[#240404] gold-border rounded-xl p-8 max-w-md w-full text-center card-shadow">
+      <div class="text-6xl mb-4">🏆</div>
+      <h3 class="text-2xl font-telenovela text-[#ffe066] mb-2">¡Fin del Juicio de las Fuentes!</h3>
+      <p class="text-gray-300 text-sm mb-6" id="finalStatusMessage">
+        Has completado el veredicto de todos los casos de la telenovela con éxito rotundo.
+      </p>
+      
+      <!-- Tarjeta de Puntuación Final -->
+      <div class="bg-black/40 border border-[#d4af37]/30 rounded-lg p-4 mb-6">
+        <span class="text-xs text-gray-400 uppercase tracking-widest block">Calificación Obtenida</span>
+        <span class="text-4xl font-extrabold text-[#ffe066]" id="finalScore">0 / 10</span>
+      </div>
+
+      <button onclick="resetGame()" class="btn-gold text-black font-semibold uppercase tracking-widest text-xs py-3 px-6 rounded w-full">
+        Volver a Jugar
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Datos de los personajes en orden constante, incluyendo fallbacks estéticos por si la imagen local falla
+    const characters = [
+      { 
+        id: 'honorio', 
+        name: 'Honorio Leal', 
+        fullname: 'Honorio Leal de las Comillas', 
+        img: 'HONORIO.png', 
+        desc: 'Cita exactamente igual y menciona la fuente de forma íntegra.', 
+        style: 'border-[#d4af37]',
+        fallbackGradient: 'from-amber-600 via-amber-800 to-yellow-700',
+        emoji: '✍️'
+      },
+      { 
+        id: 'beatriz', 
+        name: 'Beatriz Justina', 
+        fullname: 'Beatriz Intérprete Justina', 
+        img: 'BEATRIZ.png', 
+        desc: 'Parafrasea entendiendo el alma del autor y le da su crédito correcto.', 
+        style: 'border-[#3b82f6]',
+        fallbackGradient: 'from-blue-700 via-blue-900 to-indigo-950',
+        emoji: '🗣️'
+      },
+      { 
+        id: 'claridad', 
+        name: 'Claridad Vínculos', 
+        fullname: 'Claridad de los Santos Vínculos', 
+        img: 'CLARIDAD.png', 
+        desc: 'Indica honestamente que conoció al autor por medio de otra fuente indirecta.', 
+        style: 'border-green-500',
+        fallbackGradient: 'from-emerald-600 via-teal-800 to-cyan-950',
+        emoji: '🤝'
+      },
+      { 
+        id: 'paola', 
+        name: 'Paola Usurpadora', 
+        fullname: 'Paola Usurpadora de los Párrafos', 
+        img: 'PAOLA.png', 
+        desc: 'Se apropia con frialdad de las citas textuales ajenas sin dar crédito.', 
+        style: 'border-red-600',
+        fallbackGradient: 'from-red-700 via-red-950 to-rose-950',
+        emoji: '🦹‍♀️'
+      },
+      { 
+        id: 'gael', 
+        name: 'Gael Camaleón', 
+        fullname: 'Gael "Camaleón" Sombras', 
+        img: 'GAEL.png', 
+        desc: 'Disfraza el texto con sinónimos burdos para disimular que robó la idea.', 
+        style: 'border-purple-600',
+        fallbackGradient: 'from-purple-700 via-purple-950 to-indigo-950',
+        emoji: '🎭'
+      },
+      { 
+        id: 'mauricio', 
+        name: 'Mauricio Impostor', 
+        fullname: 'Mauricio Impostor de las Referencias', 
+        img: 'MAURICIO.png', 
+        desc: 'Finge haber consultado el manuscrito original cuando en realidad no lo leyó.', 
+        style: 'border-yellow-600',
+        fallbackGradient: 'from-yellow-600 via-amber-800 to-yellow-950',
+        emoji: '🧐'
+      }
+    ];
+
+    // Los 10 Casos detallados con las introducciones de situaciones literales proporcionadas por el docente
+    // Incluye las expresiones clave para el validador semántico de la Tarea 4
+    const rawCases = [
+      {
+        id: 1,
+        title: 'El Eco del Despacho',
+        intro: 'Este personaje consultó el libro de Ormrod llamado Aprendizaje Humano y luego redactó lo siguiente en su manuscrito:',
+        text: 'Ormrod (2008) define los principios del aprendizaje como “factores específicos que influyen en el aprendizaje y describen los efectos de esos factores” (p. 6). La autora sostiene que estos permiten el desarrollo de teorías asociadas a los procesos de aprendizaje.',
+        correctId: 'honorio',
+        justification: 'Es una cita directa corta de menos de 40 palabras, por lo que va incorporada en el párrafo entre comillas, indicando el autor, año y número de página exacto.',
+        keywords: ['comilla', 'autor', 'página', 'pagina'],
+        errorFeedback: '¡Un momento! Has seleccionado correctamente a Honorio Leal, pero tu justificación carece de bases sólidas. En este melodrama, para dictar sentencia con honor debes argumentar mencionando el uso de las <strong>comillas</strong> para delimitar el texto literal menor de 40 palabras, o bien la declaración explícita del <strong>autor</strong> o la <strong>página</strong>. ¡Fundamenta mejor tu veredicto!',
+        reinforcement: '¡Correcto! Identificaste los principios de Honorio: comillas impecables, autor, año y página exacta para honrar la palabra escrita.'
+      },
+      {
+        id: 2,
+        title: 'La Confesión a Medias',
+        intro: 'Este personaje trató de encontrar un libro de Ormrod llamado Aprendizaje Humano. Al no encontrarlo, decidió consultar una investigación de Mirabal que citaba a ese autor, y luego redactó lo siguiente en su manuscrito:',
+        text: 'Ormrod (2008, citado por Mirabal 2013) define los principios del aprendizaje como “factores específicos que influyen en el aprendizaje y describen los efectos de esos factores” (p. 6). La autora sostiene que estos permiten el desarrollo de teorías asociadas a los procesos de aprendizaje.',
+        correctId: 'claridad',
+        justification: 'Es una cita de cita (fuente secundaria). Se menciona el autor original que no se leyó directamente (Ormrod) y se le da crédito honesto a la fuente consultada (Mirabal).',
+        keywords: ['secundaria', 'primaria', 'indirecta', 'directamente'],
+        errorFeedback: '¡Alto ahí, alma atormentada! Has reconocido la honestidad de Claridad, pero tu defensa metodológica es demasiado débil. Para que el veredicto sea válido, debes mencionar claramente que este extracto refleja el uso de una <strong>fuente secundaria</strong> (o indirecta) para declarar que no se tuvo acceso al manuscrito de la <strong>fuente primaria</strong>. ¡Escribe con más rigor!',
+        overrideCorrectId: 'claridad', 
+        reinforcement: '¡Excelente! Claridad es siempre honesta: admite con hidalguía que no leyó el libro original de Ormrod, sino que se enteró gracias a la obra de Mirabal.'
+      },
+      {
+        id: 3,
+        title: 'El Pensamiento Traducido',
+        intro: 'Este personaje consultó un artículo de Vargas y luego redactó lo siguiente en su manuscrito:',
+        text: 'La industrialización de la economía, por un lado, y la creciente aceptación de la teoría conductista en la psicología, por el otro, provocaron un giro hacia una educación por objetivos (Vargas, 2008).',
+        correctId: 'beatriz',
+        justification: 'Se trata de una paráfrasis (cita indirecta) donde se explica con palabras propias la idea de Vargas y se coloca la referencia de autor y año al final del párrafo.',
+        keywords: ['parafrase', 'parafraseado', 'propia', 'palabra', 'final', 'autor'],
+        errorFeedback: '¡Qué osadía! Identificaste a Beatriz como la responsable de traducir el pensamiento ajeno, pero no has defendido la técnica correcta. Debes declarar en tu texto que se ha realizado una <strong>paráfrasis</strong> (o escrito con palabras propias) y se ha referenciado al <strong>autor</strong> al <strong>final</strong> del fragmento. ¡Corrige tu alegato!',
+        reinforcement: '¡Soberbio! Beatriz interpreta la esencia de la idea, la escribe con sus propias palabras, pero mantiene intacto el honor de Vargas dándole el crédito.'
+      },
+      {
+        id: 4,
+        title: 'La Declaración Fluida',
+        intro: 'Este personaje consultó un artículo de Vargas y luego redactó lo siguiente en su manuscrito:',
+        text: 'Según Vargas (2008), la industrialización de la economía, por un lado, y la creciente aceptación de la teoría conductista en la psicología, por el otro, provocaron un giro hacia una educación por objetivos.',
+        correctId: 'beatriz',
+        justification: 'Es una paráfrasis con énfasis en el autor. Se introduce la idea usando el nombre de Vargas de forma fluida y se acompaña de su año de publicación.',
+        keywords: ['parafrase', 'parafraseado', 'propia', 'palabra', 'principio', 'inicio', 'autor'],
+        errorFeedback: '¡Me decepcionas! Tienes al culpable correcto, pero tu justificación carece de la pasión metodológica que exige esta hacienda. Debes explicar que se ha <strong>parafraseado</strong> el texto de la fuente original y que el <strong>autor</strong> ha sido incorporado al <strong>principio</strong> o inicio del párrafo para dar énfasis. ¡Mejora esa redacción!',
+        reinforcement: '¡Sublime! Beatriz vuelve a brillar: integra al autor con gracia narrativa en el párrafo sin alterar la verdad del texto original.'
+      },
+      {
+        id: 5,
+        title: 'El Manuscrito Apartado',
+        intro: 'Este personaje consultó una investigación de Mirabal y luego colocó lo siguiente en su manuscrito:',
+        text: 'En la sección de resultados de la investigación, Mirabal (2013) expresa que:<br><br><div class="apa-blockquote">las respuestas emitidas por los docentes no se refieren a competencias asociadas a las Tecnologías de Información y Comunicación, pero hacen alusión a la interacción del docente con entorno tecnológico que le da soporte a la plataforma que utilizan. (p. 99)</div><br>Este es un hallazgo que llama la atención, dentro del contexto del estudio.',
+        correctId: 'honorio',
+        justification: 'Es una cita textual de más de 40 palabras. Se escribe en bloque independiente, sin comillas, con sangría aplicada, interlineado correspondiente y número de página al final.',
+        keywords: ['bloque', 'aparte', '40', 'página', 'pagina', 'autor', 'sangría', 'sangria'],
+        errorFeedback: '¡Un ultraje a las leyes de la hacienda! El sospechoso es Honorio Leal, de acuerdo, pero tu justificación es inaceptable. Debes mencionar que la cita, al superar las <strong>40</strong> palabras, requiere presentarse en un <strong>bloque aparte</strong> sin comillas, declarando el <strong>autor</strong> y la <strong>página</strong> de donde procede. ¡Escribe una fundamentación digna!',
+        reinforcement: '¡Brillante! Honorio demuestra su lealtad por las normas. Al superar las 40 palabras, generó un bloque independiente y apartó el texto con respeto absoluto.'
+      },
+      {
+        id: 6,
+        title: 'El Testimonio Entretejido',
+        intro: 'Este personaje consultó el libro de Ormrod llamado Aprendizaje Humano y luego redactó lo siguiente en su manuscrito:',
+        text: 'Los principios de aprendizaje, definidos como “factores específicos que influyen en el aprendizaje y describen los efectos de esos factores,” (Ormrod, 2008, p. 47) permiten el desarrollo de teorías asociadas a los procesos de aprendizaje.',
+        correctId: 'honorio',
+        justification: 'Es una cita textual directa corta integrada en el flujo del párrafo, utilizando comillas y proporcionando la referencia bibliográfica de manera inmediata.',
+        keywords: ['comilla', 'autor', 'página', 'pagina'],
+        errorFeedback: '¡Detén el carruaje, imprudente! Reconoces al honesto Honorio Leal, pero tu argumentación parece un plagio de desidia. Debes fundamentar tu veredicto mencionando el uso de <strong>comillas</strong> para enmarcar la frase literal menor a 40 palabras, y la citación del <strong>autor</strong> o la <strong>página</strong> correspondiente. ¡Hazlo con más pasión!',
+        reinforcement: '¡Espectacular! Honorio no deja dudas: encierra la frase exacta entre comillas y coloca autor, año y página al instante.'
+      },
+      {
+        id: 7,
+        title: 'El Disfraz de las Palabras',
+        intro: 'Este personaje consultó una fuente y luego redactó con sus propias palabras lo siguiente en su manuscrito:',
+        text: 'Por un lado, los elementos particulares que influyen en el aprendizaje y que detallan las consecuencias de dichos elementos son conocidos como principios del aprendizaje, los cuales permiten estructurar modelos teóricos explicativos sobre los procesos educativos.',
+        correctId: 'gael',
+        justification: 'Se evidencia un parafraseo claro de la definición de Ormrod (2008) en el que se ha modificado la estructura, pero se ha omitido la autoría. Gael Camaleón cambia las palabras para ocultar que robó la idea.',
+        keywords: ['parafrase', 'parafraseado', 'propia', 'palabra', 'no', 'sin', 'autor', 'fuente', 'cita'],
+        errorFeedback: '¡Escucha este lamento! El Camaleón Gael es el autor, sí, pero tu justificación no lo delata de verdad. Tienes que fundamentar con palabras claras que se ha realizado un <strong>parafraseo</strong> de una fuente, pero se cometió el delito de <strong>no citar</strong> al autor u ocultar su procedencia. ¡Vuelve a redactar con mayor rigor!',
+        reinforcement: '¡Atrapado in fraganti! Gael "Camaleón" Sombras modificó las palabras de la definición original para disimular, pero cometió el pecado de no citar a Ormrod. ¡Un camuflaje de ideas descubierto!'
+      },
+      {
+        id: 8,
+        title: 'El Párrafo Conquistado',
+        intro: 'Este personaje consultó una fuente, tomó una parte del texto y lo colocó de la siguiente manera en su manuscrito:',
+        text: 'Es un hecho indiscutible que los principios de aprendizaje se entienden como “factores específicos que influyen en el aprendizaje y describen los efectos de esos factores”, facilitando de este modo la construcción y estructuración de múltiples modelos y corrientes instruccionales.',
+        correctId: 'paola',
+        justification: 'El texto ha sido tomado de forma literal de la fuente original (está entre comillas), pero se ha omitido por completo la mención del autor. Paola se apropia con total frialdad de las palabras exactas.',
+        keywords: ['comilla', 'literal', 'copia', 'copiado', 'no', 'sin', 'autor', 'fuente', 'cita'],
+        errorFeedback: '¡Qué cinismo! Paola Usurpadora es la culpable, pero tu justificación es pura fachada. Explica con contundencia que la presencia de las <strong>comillas</strong> delata una extracción <strong>literal</strong> de la fuente, y que la infamia radica en que se omitió por completo declarar al <strong>autor</strong> o la cita. ¡Redacta con autoridad!',
+        reinforcement: '¡Veredicto dictado! Paola Usurpadora copió textualmente el fragmento de Ormrod y se lo apropió con frialdad absoluta sin colocar ninguna referencia. ¡Un robo de párrafos imperdonable!'
+      },
+      {
+        id: 9,
+        title: 'La Falsa Senda',
+        intro: 'Este personaje revisó una investigación de Mirabal en la que Mirabal resumía las principales ideas de un artículo de Vargas sobre el nacimiento de la formación orientada a los objetivos de aprendizaje y luego redactó lo siguiente en su manuscrito:',
+        text: 'Por una parte, la tecnificación de los sistemas de producción y, por otra, la asimilación paulatina de la psicología conductista generaron una notable reorientación curricular hacia el diseño de una formación enfocada en objetivos de aprendizaje <span class="text-[#ffe066]">(Mirabal, 2013)</span>.',
+        correctId: 'mauricio',
+        justification: 'Se presenta una idea parafraseada de Vargas (2008), pero el autor miente y coloca a la fuente secundaria (Mirabal) como si fuese la consultada originalmente para fingir acceso primario.',
+        keywords: ['secundaria', 'primaria', 'falsa', 'vargas', 'mirabal'],
+        errorFeedback: '¡Vaya complot! Mauricio Impostor es el culpable de esta farsa, pero tu justificación no destapa su engaño. Debes explicar que el autor colocó una <strong>fuente secundaria</strong> (Mirabal) como si fuera la <strong>fuente primaria</strong> u original (Vargas) para simular un rigor inexistente. ¡Escribe con bases claras!',
+        reinforcement: '¡Desenmascarado! Mauricio Impostor simula haber revisado de primera mano a Mirabal atribuyéndole de forma inapropiada la autoría intelectual que en verdad pertenece a Vargas (2008). ¡Puro maquillaje de fuentes!'
+      },
+      {
+        id: 10,
+        title: 'El Espejismo de la Página',
+        intro: 'Este personaje revisó una investigación de Mirabal en la que Mirabal citaba textualmente un artículo de Vargas en relación con el nacimiento de la formación orientada a los objetivos de aprendizaje y luego colocó lo siguiente en su manuscrito:',
+        text: 'Como bien estipula Mirabal (2013), <span class="text-[#ffe066]">“la transformación industrial de los mercados y la aceptación creciente del conductismo en el ámbito psicológico determinaron un giro hacia una educación por objetivos” (p. 25)</span>',
+        correctId: 'mauricio',
+        justification: 'Se copia literalmente un fragmento que pertenece originalmente a Vargas (2008), pero se le atribuye la autoría y la cita directa literal a la fuente secundaria de Mirabal (2013).',
+        keywords: ['secundaria', 'primaria', 'falsa', 'vargas', 'mirabal'],
+        errorFeedback: '¡La red de mentiras se enreda! El Impostor Mauricio ha sido descubierto, pero debes fundamentar tu acusación. Justifica detalladamente indicando que se ha copiado textualmente una idea cuyo autor real es Vargas, pero el sospechoso colocó la <strong>fuente secundaria</strong> (Mirabal) como si fuera la <strong>fuente primaria</strong> u original. ¡Redacta de nuevo con la verdad académica!',
+        reinforcement: '¡Veredicto implacable! Mauricio Impostor colocó las comillas y la página con aires de gran investigador, pero atribuyó falsamente la frase textual a Mirabal cuando el autor real es Vargas. ¡Una traición al rigor académico!'
+      }
+    ];
+
+    // Estados Dinámicos globales del juego
+    let shuffledCases = [];
+    let userProgress = []; // Almacena el progreso de las 10 diapositivas { selectedCharacterId, justificationText, answered, isCorrect }
+    let currentCaseIndex = 0;
+    let score = 0;
+
+    // Elementos del DOM
+    const caseTitleLabel = document.getElementById('caseTitleLabel');
+    const caseCounter = document.getElementById('caseCounter');
+    const scoreCounter = document.getElementById('scoreCounter');
+    const caseText = document.getElementById('caseText');
+    const studentJustification = document.getElementById('studentJustification');
+    const charCount = document.getElementById('charCount');
+    const validationWarning = document.getElementById('validationWarning');
+    const optionsGrid = document.getElementById('optionsGrid');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const feedbackIcon = document.getElementById('feedbackIcon');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackText = document.getElementById('feedbackText');
+    const justificationReinforcement = document.getElementById('justificationReinforcement');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const btnNext = document.getElementById('btnNext');
+    const btnPrev = document.getElementById('btnPrev');
+    const finishModal = document.getElementById('finishModal');
+    const finalScore = document.getElementById('finalScore');
+    const finalStatusMessage = document.getElementById('finalStatusMessage');
+
+    // Inicializar o reiniciar por completo el juego barajando de forma aleatoria los casos
+    function initGame() {
+      // Barajado Aleatorio de los casos (Fisher-Yates)
+      shuffledCases = [...rawCases].sort(() => Math.random() - 0.5);
+
+      // Reiniciar las estructuras de progreso para el orden barajado
+      userProgress = shuffledCases.map(() => ({
+        selectedCharacterId: null,
+        justificationText: '',
+        answered: false,
+        isCorrect: false
+      }));
+
+      score = 0;
+      scoreCounter.textContent = `0 / 10`;
+      
+      renderOptions();
+      loadCase(0);
+      
+      // Validador de escritura para la justificación del alumno
+      studentJustification.oninput = validateForm;
+    }
+
+    // Dibujar la cuadrícula de personajes de forma constante en el orden del reparto
+    function renderOptions() {
+      optionsGrid.innerHTML = '';
+      characters.forEach(char => {
+        const charCard = document.createElement('div');
+        charCard.className = `bg-black/40 border border-[#d4af37]/20 rounded-lg p-3 flex flex-col items-center justify-between text-center cursor-pointer hover:bg-[#2d0707]/50 hover:border-[#d4af37]/60 transition-all duration-300 relative group`;
+        charCard.id = `card-${char.id}`;
+        charCard.onclick = () => selectCharacter(char.id);
+
+        charCard.innerHTML = `
+          <!-- Contenedor del Avatar Híbrido -->
+          <div class="relative w-20 h-20 mb-2 rounded-full overflow-hidden border-2 ${char.style} shadow-lg group-hover:scale-105 transition-transform duration-300 bg-neutral-900 flex items-center justify-center">
+            
+            <!-- Imagen local original -->
+            <img src="${char.img}" alt="${char.fullname}" 
+                 id="img-${char.id}"
+                 class="w-full h-full object-cover z-10 relative" 
+                 onerror="handleImageError('${char.id}')">
+            
+            <!-- Avatar gráfico de emergencia (Se activa si falla la imagen) -->
+            <div id="fallback-${char.id}" 
+                 class="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br ${char.fallbackGradient} text-3xl select-none z-0">
+              ${char.emoji}
+            </div>
+
+          </div>
+          
+          <span class="text-xs font-bold text-gray-200 group-hover:text-[#ffe066] transition-colors">${char.name}</span>
+          <span class="text-[9px] text-gray-400 mt-1 italic block max-w-[130px] line-clamp-1">${char.desc}</span>
+          
+          <!-- Indicador de selección -->
+          <div class="absolute top-2 right-2 w-4 h-4 rounded-full border border-[#d4af37]/50 flex items-center justify-center bg-black/80" id="check-${char.id}">
+            <div class="w-2 h-2 rounded-full bg-[#d4af37] scale-0 transition-transform duration-200" id="dot-${char.id}"></div>
+          </div>
+        `;
+        optionsGrid.appendChild(charCard);
+      });
+    }
+
+    // Esconder la imagen si no se encuentra y dejar ver el fallback gráfico temático
+    function handleImageError(id) {
+      const imgElement = document.getElementById(`img-${id}`);
+      if (imgElement) {
+        // Ocultamos la etiqueta img que falló para que se vea el hermoso degradado del fondo con el emoji
+        imgElement.style.display = 'none';
+      }
+    }
+
+    // Ejecutar lógica de validación interactiva para habilitar o deshabilitar respuestas
+    function validateForm() {
+      const progress = userProgress[currentCaseIndex];
+      if (progress.answered) return; // Si ya está contestada, no requiere validación
+
+      const textLength = studentJustification.value.trim().length;
+      charCount.textContent = `${textLength} / 250 caracteres (mín. 50)`;
+      
+      // Actualizar la justificación escrita por el alumno en su estado dinámico
+      progress.justificationText = studentJustification.value;
+
+      // Cambiar de color el indicador de requisitos
+      if (textLength >= 50 && textLength <= 250) {
+        charCount.className = "text-[11px] text-green-400 font-semibold";
+      } else {
+        charCount.className = "text-[11px] text-red-400";
+      }
+
+      // Validar que se haya escogido un personaje y se cumpla el mínimo de caracteres
+      if (progress.selectedCharacterId && textLength >= 50 && textLength <= 250) {
+        btnSubmit.disabled = false;
+        validationWarning.classList.add('hidden');
+      } else {
+        btnSubmit.disabled = true;
+        validationWarning.classList.remove('hidden');
+        if (!progress.selectedCharacterId && (textLength < 50 || textLength > 250)) {
+          validationWarning.textContent = "⚠️ Elige un personaje y redacta tu justificación (entre 50 y 250 car.).";
+        } else if (!progress.selectedCharacterId) {
+          validationWarning.textContent = "⚠️ Selecciona el personaje que crees que es el autor.";
+        } else if (textLength < 50) {
+          validationWarning.textContent = `⚠️ Escribe un poco más (faltan ${50 - textLength} caracteres).`;
+        } else {
+          validationWarning.textContent = "⚠️ Has excedido el límite máximo de 250 caracteres.";
+        }
+      }
+    }
+
+    // Seleccionar personaje en los casos pendientes
+    function selectCharacter(id) {
+      const progress = userProgress[currentCaseIndex];
+      if (progress.answered) return; // Evitar que cambien respuestas en casos ya resueltos
+
+      // Quitar clases previas de selección visual
+      if (progress.selectedCharacterId) {
+        const prevCard = document.getElementById(`card-${progress.selectedCharacterId}`);
+        if (prevCard) {
+          prevCard.classList.remove('bg-[#2d0707]/60', 'border-[#d4af37]');
+        }
+        const prevDot = document.getElementById(`dot-${progress.selectedCharacterId}`);
+        if (prevDot) {
+          prevDot.classList.add('scale-0');
+        }
+      }
+
+      // Aplicar nueva selección
+      progress.selectedCharacterId = id;
+      document.getElementById(`card-${id}`).classList.add('bg-[#2d0707]/60', 'border-[#d4af37]');
+      document.getElementById(`dot-${id}`).classList.remove('scale-0');
+
+      validateForm();
+    }
+
+    // Cargar y pintar un caso específico en pantalla, con soporte para estados contestados (solo lectura)
+    function loadCase(index) {
+      currentCaseIndex = index;
+      const progress = userProgress[index];
+      const c = shuffledCases[index];
+
+      // Configurar el contador general de casos y el título dramático no obvio
+      caseTitleLabel.textContent = `Caso ${index + 1} de ${shuffledCases.length}`;
+      caseCounter.textContent = c.title;
+
+      // Inyectar de manera integrada e interactiva la introducción y el extracto académico
+      caseText.innerHTML = `
+        <div class="mb-4 text-sm text-gray-300 font-sans border-b border-[#d4af37]/20 pb-3 leading-relaxed">
+          <span class="text-[#ffe066] font-semibold">Situación:</span> ${c.intro}
+        </div>
+        <div class="text-base md:text-lg leading-relaxed font-serif text-gray-100 italic">
+          ${c.text}
+        </div>
+      `;
+
+      // Configurar el valor de la justificación
+      studentJustification.value = progress.justificationText;
+
+      // Configurar estado del botón Caso Anterior
+      if (index === 0) {
+        btnPrev.classList.add('opacity-40', 'pointer-events-none');
+      } else {
+        btnPrev.classList.remove('opacity-40', 'pointer-events-none');
+      }
+
+      // Limpiar todas las clases, opacidades y puntos de las tarjetas
+      characters.forEach(char => {
+        const card = document.getElementById(`card-${char.id}`);
+        if (card) {
+          card.classList.remove('bg-[#2d0707]/60', 'border-[#d4af37]', 'opacity-50', 'bg-green-950/40', 'bg-red-950/40', 'border-green-500', 'border-red-500');
+        }
+        const dot = document.getElementById(`dot-${char.id}`);
+        if (dot) dot.classList.add('scale-0');
+      });
+
+      // Validar si el caso ya fue resuelto previamente (Vista de Solo Lectura o Estado de Error de Justificación)
+      if (progress.answered) {
+        studentJustification.disabled = true;
+        validationWarning.classList.add('hidden');
+        btnSubmit.classList.add('hidden');
+        btnNext.classList.remove('hidden');
+
+        // Modificar texto del botón final
+        if (index + 1 === shuffledCases.length) {
+          btnNext.textContent = "Finalizar Juicio";
+        } else {
+          btnNext.textContent = "Siguiente Caso";
+        }
+
+        // Marcar el personaje seleccionado y la opción correcta
+        const targetCorrectId = c.overrideCorrectId ? c.overrideCorrectId : c.correctId;
+        
+        characters.forEach(char => {
+          const card = document.getElementById(`card-${char.id}`);
+          if (!card) return;
+
+          // Opacar las opciones que no tuvieron participación
+          if (char.id !== progress.selectedCharacterId && char.id !== targetCorrectId) {
+            card.classList.add('opacity-50');
+          }
+
+          // Pintar la respuesta correcta de verde
+          if (char.id === targetCorrectId) {
+            card.classList.add('bg-green-950/40', 'border-green-500');
+          }
+
+          // Pintar la selección del alumno
+          if (char.id === progress.selectedCharacterId) {
+            document.getElementById(`dot-${char.id}`).classList.remove('scale-0');
+            if (progress.isCorrect) {
+              card.classList.add('bg-green-950/40', 'border-green-500');
+            } else {
+              card.classList.add('bg-red-950/40', 'border-red-500');
+            }
+          }
+        });
+
+        // Cargar feedback detallado del caso resuelto
+        feedbackBox.classList.remove('hidden');
+        justificationReinforcement.textContent = `Tu justificación registrada: "${progress.justificationText}"`;
+        
+        if (progress.isCorrect) {
+          feedbackBox.className = "rounded-lg p-5 mb-6 border border-green-500/30 bg-green-950/20 text-green-100 transition-all duration-300";
+          feedbackIcon.textContent = "🌹🏆";
+          feedbackTitle.textContent = "¡Veredicto de Honor Académico!";
+          feedbackText.innerHTML = `<strong>${c.reinforcement}</strong><br><br><span class="text-xs text-gray-300"><strong>Fundamento Metodológico:</strong> ${c.justification}</span>`;
+        } else {
+          const selectedChar = characters.find(char => char.id === progress.selectedCharacterId);
+          const correctChar = characters.find(char => char.id === targetCorrectId);
+          feedbackBox.className = "rounded-lg p-5 mb-6 border border-red-500/30 bg-red-950/20 text-red-100 transition-all duration-300";
+          feedbackIcon.textContent = "🥀💔";
+          feedbackTitle.textContent = "¡Escándalo en la Hacienda de la Metodología!";
+          feedbackText.innerHTML = `Asignaste la autoría a <strong>${selectedChar.fullname}</strong>, pero el verdadero redactor fue <strong>${correctChar.fullname}</strong>.<br><br><strong class="text-[#ffe066]">¿Por qué?</strong> ${c.justification}<br><br><span class="text-xs text-gray-300">¡Vuelve a repasar las intenciones de cada miembro del reparto!</span>`;
+        }
+
+      } else {
+        // Modo Edición / Responder Caso
+        studentJustification.disabled = false;
+        feedbackBox.classList.add('hidden');
+        btnSubmit.classList.remove('hidden');
+        btnSubmit.disabled = true;
+        btnNext.classList.add('hidden');
+
+        // Cargar selección temporal si existiera
+        if (progress.selectedCharacterId) {
+          document.getElementById(`card-${progress.selectedCharacterId}`).classList.add('bg-[#2d0707]/60', 'border-[#d4af37]');
+          document.getElementById(`dot-${progress.selectedCharacterId}`).classList.remove('scale-0');
+        }
+
+        validateForm();
+      }
+    }
+
+    // Registrar y evaluar la respuesta actual aplicando validación de Tarea 4
+    btnSubmit.onclick = () => {
+      const progress = userProgress[currentCaseIndex];
+      if (!progress.selectedCharacterId || progress.answered) return;
+
+      const justificationText = studentJustification.value.trim();
+      if (justificationText.length < 50 || justificationText.length > 250) return;
+
+      const c = shuffledCases[currentCaseIndex];
+      const targetCorrectId = c.overrideCorrectId ? c.overrideCorrectId : c.correctId;
+      const isCharacterCorrect = progress.selectedCharacterId === targetCorrectId;
+
+      // 1. Si el personaje es incorrecto, se marca como error inmediatamente (clásico veredicto fallido)
+      if (!isCharacterCorrect) {
+        progress.answered = true;
+        progress.isCorrect = false;
+        progress.justificationText = justificationText;
+        loadCase(currentCaseIndex);
+        return;
+      }
+
+      // 2. Si el personaje es correcto, realizamos el análisis de palabras clave (Tarea 4)
+      const lowercaseJust = justificationText.toLowerCase();
+      const hasKeyword = c.keywords.some(keyword => lowercaseJust.includes(keyword));
+
+      if (hasKeyword) {
+        // Justificación bien fundamentada: Se aprueba la respuesta
+        progress.answered = true;
+        progress.isCorrect = true;
+        progress.justificationText = justificationText;
+        score++;
+        
+        // Recalcular puntaje dinámico
+        let totalCorrect = userProgress.filter(p => p.answered && p.isCorrect).length;
+        scoreCounter.textContent = `${totalCorrect} / 10`;
+        
+        loadCase(currentCaseIndex);
+      } else {
+        // Seleccionó personaje correcto pero justificación carece de fundamentos técnicos
+        // Se activa el bloqueo dinámico y se muestra el mensaje de telenovela
+        feedbackBox.className = "rounded-lg p-5 mb-6 border border-amber-500/40 bg-amber-950/20 text-amber-100 transition-all duration-300";
+        feedbackIcon.textContent = "🎭🥀";
+        feedbackTitle.textContent = "¡Veredicto Inconcluso!";
+        justificationReinforcement.textContent = "⚠️ Fundamentación insuficiente detectada";
+        feedbackText.innerHTML = c.errorFeedback;
+        feedbackBox.classList.remove('hidden');
+        
+        // Efecto sacudida en la caja de texto para atraer atención visual
+        studentJustification.focus();
+        studentJustification.classList.add('border-amber-500', 'ring-2', 'ring-amber-500/20');
+        setTimeout(() => {
+          studentJustification.classList.remove('border-amber-500', 'ring-2', 'ring-amber-500/20');
+        }, 1500);
+      }
+    };
+
+    // Navegar al Siguiente Caso o activar Modal de cierre
+    btnNext.onclick = () => {
+      if (currentCaseIndex + 1 < shuffledCases.length) {
+        loadCase(currentCaseIndex + 1);
+      } else {
+        showFinalResults();
+      }
+    };
+
+    // Navegar al Caso Anterior
+    btnPrev.onclick = () => {
+      if (currentCaseIndex > 0) {
+        loadCase(currentCaseIndex - 1);
+      }
+    };
+
+    // Lanzar panel de cierre con retroalimentación de 10 casos
+    function showFinalResults() {
+      const finalScoreCount = userProgress.filter(p => p.answered && p.isCorrect).length;
+      finalScore.textContent = `${finalScoreCount} / 10`;
+      
+      let message = "";
+      if (finalScoreCount === 10) {
+        message = "¡Perfección Absoluta! Tienes un ojo clínico e impecable para identificar la integridad de las fuentes. Don Aurelio de la Fuente Primaria te nombraría heredero universal de todo su conocimiento.";
+      } else if (finalScoreCount >= 7) {
+        message = "¡Excelente Veredicto! Has detectado con perspicacia las artimañas intelectuales de Paola, Gael y Mauricio. Tu rigor metodológico es digno de un investigador leal.";
+      } else if (finalScoreCount >= 4) {
+        message = "¡Buen intento! Evitaste varios pecados graves, pero las tácticas sutiles de los impostores te han confundido. ¡Presta más atención a los vínculos de autoría!";
+      } else {
+        message = "¡Alerta de Plagio Masivo! La Usurpadora, el Camaleón y el Impostor han tomado el control de tu análisis. Es momento de regresar a las bases de citación de la Hacienda de la Metodología.";
+      }
+      
+      finalStatusMessage.textContent = message;
+      finishModal.classList.remove('hidden');
+    }
+
+    // Reiniciar juego por completo barajando casos
+    function resetGame() {
+      finishModal.classList.add('hidden');
+      initGame();
+    }
+
+    // Iniciar juego al cargar la página
+    window.onload = initGame;
+  </script>
+</body>
+</html>
